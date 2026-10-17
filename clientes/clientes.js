@@ -33,4 +33,20 @@ function agregarCliente(nombre) {
     return nuevoCliente;
 }
 
-module.exports = { listarClientes, agregarCliente };
+// Nueva funcion: buscar cliente por ID
+function buscarCliente(id) {
+    const clientes = listarClientes();
+    const cliente = clientes.find(cliente => cliente.id === Number(id));
+
+    if (!cliente) {
+        return null;
+    }
+
+    return cliente;
+}
+
+module.exports = {
+    listarClientes,
+    agregarCliente,
+    buscarCliente
+};
