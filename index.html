@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Prototipo colaborativo de un sistema de ventas">
+    <title>Sistema de Ventas</title>
+    <link rel="stylesheet" href="./styles.css">
+    <script type="module" src="./index.js"></script>
+</head>
+
+<body>
+    <div class="FrontEnd-app">
+
+        <aside class="FrontEnd-sidebar">
+            <div class="FrontEnd-brand">
+                <div class="FrontEnd-brand-icon">SV</div>
+                <div>
+                    <h2>Sistema de Ventas</h2>
+                    <p>Panel de gestión</p>
+                </div>
+            </div>
+
+            <nav class="FrontEnd-navigation">
+                <a href="#inicio" class="FrontEnd-nav-link FrontEnd-nav-active">
+                    <span>⌂</span> Inicio
+                </a>
+                <a href="#clientes" class="FrontEnd-nav-link">
+                    <span>♙</span> Clientes
+                </a>
+                <a href="#carrito" class="FrontEnd-nav-link">
+                    <span>🛒</span> Carrito de ventas
+                </a>
+            </nav>
+
+            <div class="FrontEnd-sidebar-footer">
+                <span class="FrontEnd-status-dot"></span>
+                Sistema de demostración
+            </div>
+        </aside>
+
+        <main class="FrontEnd-main">
+
+            <header class="FrontEnd-topbar">
+                <div>
+                    <p class="FrontEnd-eyebrow">GESTIÓN COMERCIAL</p>
+                    <h1>Panel principal</h1>
+                </div>
+                <span class="FrontEnd-version">Versión 1.0</span>
+            </header>
+
+            <section id="inicio" class="FrontEnd-welcome">
+                <div>
+                    <p class="FrontEnd-eyebrow">BIENVENIDO</p>
+                    <h2>Gestiona tus ventas fácilmente</h2>
+                    <p>
+                        Administra tus clientes y organiza los productos
+                        de tu carrito desde un solo lugar.
+                    </p>
+                </div>
+                <div class="FrontEnd-welcome-icon">↗</div>
+            </section>
+
+            <section class="FrontEnd-stats">
+                <article class="FrontEnd-stat-card">
+                    <div class="FrontEnd-stat-icon FrontEnd-icon-blue">C</div>
+                    <div>
+                        <p>Clientes registrados</p>
+                        <strong id="total-clientes">0</strong>
+                    </div>
+                </article>
+
+                <article class="FrontEnd-stat-card">
+                    <div class="FrontEnd-stat-icon FrontEnd-icon-green">P</div>
+                    <div>
+                        <p>Productos en carrito</p>
+                        <strong id="total-productos">0</strong>
+                    </div>
+                </article>
+
+                <article class="FrontEnd-stat-card">
+                    <div class="FrontEnd-stat-icon FrontEnd-icon-orange">S/</div>
+                    <div>
+                        <p>Subtotal del carrito</p>
+                        <strong id="subtotal-carrito">S/ 0.00</strong>
+                    </div>
+                </article>
+            </section>
+
+            <section id="clientes" class="FrontEnd-panel">
+                <div class="FrontEnd-panel-header">
+                    <div>
+                        <p class="FrontEnd-eyebrow">MÓDULO 01</p>
+                        <h2>Gestión de clientes</h2>
+                        <p>Registra y consulta tus clientes.</p>
+                    </div>
+                    <span class="FrontEnd-module-tag">Clientes</span>
+                </div>
+
+                <form id="form-cliente" class="FrontEnd-form">
+                    <div class="FrontEnd-field">
+                        <label for="nombre-cliente">Nombre del cliente</label>
+                        <input type="text" id="nombre-cliente" name="nombre" placeholder="Ej. Carlos Ruiz" required>
+                    </div>
+                    <button type="submit" class="FrontEnd-button">
+                        + Agregar cliente
+                    </button>
+                </form>
+
+                <form id="form-buscar-cliente" class="FrontEnd-search">
+                    <div class="FrontEnd-field">
+                        <label for="buscar-cliente">Buscar por ID</label>
+                        <input type="number" id="buscar-cliente" min="1" placeholder="Ingresa el ID del cliente">
+                    </div>
+                    <button type="submit" class="FrontEnd-button-secondary">
+                        Buscar
+                    </button>
+                    <button type="button" id="limpiar-busqueda" class="FrontEnd-button-ghost">
+                        Mostrar todos
+                    </button>
+                </form>
+
+                <div id="mensaje-clientes" class="FrontEnd-message" role="status" aria-live="polite"></div>
+
+                <div class="FrontEnd-table-wrapper">
+                    <table class="FrontEnd-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre del cliente</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-clientes">
+                            <tr>
+                                <td colspan="2" class="FrontEnd-empty">
+                                    Los clientes aparecerán aquí.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="carrito" class="FrontEnd-panel">
+                <div class="FrontEnd-panel-header">
+                    <div>
+                        <p class="FrontEnd-eyebrow">MÓDULO 02</p>
+                        <h2>Carrito de ventas</h2>
+                        <p>Agrega productos y consulta el subtotal.</p>
+                    </div>
+                    <span class="FrontEnd-module-tag FrontEnd-tag-green">
+                        Carrito
+                    </span>
+                </div>
+
+                <form id="form-producto" class="FrontEnd-form">
+                    <div class="FrontEnd-field">
+                        <label for="nombre-producto">Nombre del producto</label>
+                        <input type="text" id="nombre-producto" name="nombre" placeholder="Ej. Teclado" required>
+                    </div>
+
+                    <div class="FrontEnd-field FrontEnd-price-field">
+                        <label for="precio-producto">Precio (S/)</label>
+                        <input type="number" id="precio-producto" name="precio" min="0.01" step="0.01"
+                            placeholder="0.00" required>
+                    </div>
+
+                    <button type="submit" class="FrontEnd-button">
+                        + Agregar producto
+                    </button>
+                </form>
+
+                <div id="mensaje-carrito" class="FrontEnd-message" role="status" aria-live="polite"></div>
+
+                <div class="FrontEnd-table-wrapper">
+                    <table class="FrontEnd-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Producto</th>
+                                <th>Precio</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-carrito">
+                            <tr>
+                                <td colspan="3" class="FrontEnd-empty">
+                                    Tu carrito está vacío.
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="2">Subtotal</td>
+                                <td id="subtotal-tabla">S/ 0.00</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </section>
+
+            <footer class="FrontEnd-footer">
+                Sistema de Ventas · Proyecto colaborativo con Git y GitHub
+            </footer>
+
+        </main>
+    </div>
+</body>
+
+</html>
