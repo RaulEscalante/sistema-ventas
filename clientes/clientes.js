@@ -53,3 +53,37 @@ export function eliminarCliente(id) {
 
     return clienteEliminado;
 }
+
+export function editarCliente(id, nombre, dni) {
+    const idCliente = Number(id);
+
+    if (!Number.isInteger(idCliente) || idCliente < 1) {
+        throw new Error("Ingresa un ID de cliente válido.");
+    }
+
+    if (typeof nombre !== "string" || nombre.trim() === "") {
+        throw new Error("El nombre del cliente es obligatorio.");
+    }
+
+    if (typeof dni !== "string" || !/^[0-9]{1,8}$/.test(dni)) {
+        throw new Error("El DNI es obligatorio y debe contener entre 1 y 8 números.");
+    }
+
+    const clientes = listarClientes();
+    const indiceCliente = clientes.findIndex(cliente => cliente.id === idCliente);
+
+    if (indiceCliente === -1) {
+        return null;
+    }
+
+    const clienteActualizado = {
+        ...clientes[indiceCliente],
+        nombre: nombre.trim(),
+        dni
+    };
+
+    clientes[indiceCliente] = clienteActualizado;
+    localStorage.setItem(CLIENTES_STORAGE_KEY, JSON.stringify(clientes));
+
+    return clienteActualizado;
+}

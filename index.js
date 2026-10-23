@@ -12,6 +12,11 @@ const elementos = {
     limpiarBusqueda: document.getElementById("limpiar-busqueda"),
     listaClientes: document.getElementById("lista-clientes"),
     mensajeClientes: document.getElementById("mensaje-clientes"),
+    dialogoEditarCliente: document.getElementById("dialogo-editar-cliente"),
+    formularioEditarCliente: document.getElementById("form-editar-cliente"),
+    nombreEditarCliente: document.getElementById("nombre-editar-cliente"),
+    dniEditarCliente: document.getElementById("dni-editar-cliente"),
+    cancelarEdicionCliente: document.getElementById("cancelar-edicion-cliente"),
 
     formularioProducto: document.getElementById("form-producto"),
     nombreProducto: document.getElementById("nombre-producto"),
@@ -28,6 +33,7 @@ const elementos = {
 let moduloClientes = null;
 let moduloCarrito = null;
 let clientesVisibles = null;
+let idClienteEnEdicion = null;
 
 // Muestra mensajes sin interpretar el contenido como HTML.
 function mostrarMensaje(elemento, mensaje, tipo = "success") {
@@ -109,7 +115,8 @@ async function cargarModulos() {
             listarClientes: clientesApi.listarClientes,
             agregarCliente: clientesApi.agregarCliente,
             buscarCliente: clientesApi.buscarCliente,
-            eliminarCliente: clientesApi.eliminarCliente
+            eliminarCliente: clientesApi.eliminarCliente,
+            editarCliente: clientesApi.editarCliente
         };
         await actualizarClientes();
     } catch (error) {
@@ -170,17 +177,26 @@ async function actualizarClientes(clientes = null) {
         const celdaNombre = document.createElement("td");
         const celdaDni = document.createElement("td");
         const celdaAcciones = document.createElement("td");
+        const botonEditar = document.createElement("button");
         const botonEliminar = document.createElement("button");
 
         celdaId.textContent = cliente.id;
         celdaNombre.textContent = cliente.nombre;
         celdaDni.textContent = cliente.dni ?? "";
+        botonEditar.type = "button";
+        botonEditar.className = "FrontEnd-button-secondary";
+        botonEditar.dataset.accion = "editar-cliente";
+        botonEditar.dataset.clienteId = cliente.id;
+        botonEditar.textContent = "Editar";
+        botonEditar.setAttribute("aria-label", `Editar cliente ${cliente.nombre}`);
+
         botonEliminar.type = "button";
         botonEliminar.className = "FrontEnd-button-danger";
+        botonEliminar.dataset.accion = "eliminar-cliente";
         botonEliminar.dataset.clienteId = cliente.id;
         botonEliminar.textContent = "Eliminar";
         botonEliminar.setAttribute("aria-label", `Eliminar cliente ${cliente.nombre}`);
-        celdaAcciones.appendChild(botonEliminar);
+        celdaAcciones.append(botonEditar, botonEliminar);
 
         fila.append(celdaId, celdaNombre, celdaDni, celdaAcciones);
         elementos.listaClientes.appendChild(fila);
@@ -287,7 +303,31 @@ elementos.listaClientes.addEventListener("click", async evento => {
 
     if (!(objetivo instanceof Element)) return;
 
-    const botonEliminar = objetivo.closest("button[data-cliente-id]");
+    const botonEditar = objetivo.closest("button[data-accion='editar-cliente']");
+
+    if (botonEditar) {
+        const id = Number(botonEditar.dataset.clienteId);
+
+        try {
+            const cliente = await moduloClientes.buscarCliente(id);
+
+            if (!cliente) {
+                throw new Error("No se encontró el cliente que deseas editar.");
+            }
+
+            idClienteEnEdicion = id;
+            elementos.nombreEditarCliente.value = cliente.nombre;
+            elementos.dniEditarCliente.value = cliente.dni ?? "";
+            elementos.dialogoEditarCliente.showModal();
+            elementos.nombreEditarCliente.focus();
+        } catch (error) {
+            mostrarMensaje(elementos.mensajeClientes, error.message || "No se pudo abrir la edición.", "error");
+        }
+
+        return;
+    }
+
+    const botonEliminar = objetivo.closest("button[data-accion='eliminar-cliente']");
 
     if (!botonEliminar) return;
 
@@ -310,6 +350,44 @@ elementos.listaClientes.addEventListener("click", async evento => {
     } catch (error) {
         mostrarMensaje(elementos.mensajeClientes, error.message || "No se pudo eliminar el cliente.", "error");
     }
+});
+
+elementos.formularioEditarCliente.addEventListener("submit", async evento => {
+    evento.preventDefault();
+
+    if (idClienteEnEdicion === null) return;
+
+    try {
+        const clienteActualizado = await moduloClientes.editarCliente(
+            idClienteEnEdicion,
+            elementos.nombreEditarCliente.value,
+            elementos.dniEditarCliente.value.trim()
+        );
+
+        if (!clienteActualizado) {
+            throw new Error("No se encontró el cliente que deseas editar.");
+        }
+
+        const clientesActualizados = clientesVisibles === null
+            ? null
+            : clientesVisibles.map(cliente =>
+                cliente.id === clienteActualizado.id ? clienteActualizado : cliente
+            );
+        elementos.dialogoEditarCliente.close();
+        await actualizarClientes(clientesActualizados);
+        mostrarMensaje(elementos.mensajeClientes, `Se actualizaron los datos de ${clienteActualizado.nombre}.`);
+    } catch (error) {
+        mostrarMensaje(elementos.mensajeClientes, error.message || "No se pudo editar el cliente.", "error");
+    }
+});
+
+elementos.cancelarEdicionCliente.addEventListener("click", () => {
+    elementos.dialogoEditarCliente.close();
+});
+
+elementos.dialogoEditarCliente.addEventListener("close", () => {
+    idClienteEnEdicion = null;
+    elementos.formularioEditarCliente.reset();
 });
 
 // Busca un cliente por su ID.

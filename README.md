@@ -58,7 +58,8 @@ sistema-ventas/
 3. Mantener un identificador único y autoincremental para cada cliente.
 4. Implementar `buscarCliente(id)`, que devuelva el cliente encontrado o `null` si no existe.
 5. Implementar `eliminarCliente(id)`, que elimine y devuelva el cliente encontrado o `null` si no existe.
-6. Preparar datos iniciales de prueba en `clientes.json`.
+6. Implementar `editarCliente(id, nombre, dni)`, que valide y devuelva los datos actualizados, o `null` si el cliente no existe.
+7. Preparar datos iniciales de prueba en `clientes.json`.
 
 ### Integración con la interfaz
 
@@ -176,6 +177,7 @@ La interfaz espera las siguientes funciones:
 - `agregarCliente(nombre, dni)`
 - `buscarCliente(id)`
 - `eliminarCliente(id)`
+- `editarCliente(id, nombre, dni)`
 
 **Módulo de carrito**
 - `agregarAlCarrito(item)`

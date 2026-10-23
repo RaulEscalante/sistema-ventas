@@ -385,6 +385,32 @@ button {
     color: var(--FrontEnd-muted);
 }
 
+.FrontEnd-dialog {
+    width: min(520px, calc(100% - 32px));
+    padding: 24px;
+    border: 1px solid var(--FrontEnd-border);
+    border-radius: 12px;
+    color: var(--FrontEnd-text);
+}
+
+.FrontEnd-dialog::backdrop {
+    background: #0f172a80;
+}
+
+.FrontEnd-dialog h2 {
+    flex-basis: 100%;
+    margin: 0;
+    font-size: 20px;
+}
+
+.FrontEnd-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+    width: 100%;
+}
+
 .FrontEnd-message {
     display: none;
     margin: 0 0 16px;

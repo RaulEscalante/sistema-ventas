@@ -149,6 +149,27 @@
                 </div>
             </section>
 
+            <dialog id="dialogo-editar-cliente" class="FrontEnd-dialog">
+                <form id="form-editar-cliente" class="FrontEnd-form">
+                    <h2>Editar cliente</h2>
+                    <div class="FrontEnd-field">
+                        <label for="nombre-editar-cliente">Nombre del cliente</label>
+                        <input type="text" id="nombre-editar-cliente" name="nombre" required>
+                    </div>
+                    <div class="FrontEnd-field">
+                        <label for="dni-editar-cliente">DNI (máximo 8 números)</label>
+                        <input type="text" id="dni-editar-cliente" name="dni" inputmode="numeric"
+                            pattern="[0-9]{1,8}" maxlength="8" required>
+                    </div>
+                    <div class="FrontEnd-dialog-actions">
+                        <button type="button" id="cancelar-edicion-cliente" class="FrontEnd-button-ghost">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="FrontEnd-button">Guardar cambios</button>
+                    </div>
+                </form>
+            </dialog>
+
             <section id="carrito" class="FrontEnd-panel">
                 <div class="FrontEnd-panel-header">
                     <div>
