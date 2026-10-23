@@ -1,32 +1,84 @@
 
-let carrito = [];
+const CARRITO_STORAGE_KEY = "sistemaVentasCarrito";
 
-// Funcion para agregar un producto al carrito
-function agregarAlCarrito(item) {
-    carrito.push(item);
-    console.log("Producto agregado:", item.nombre);
-}
+// Recuperar los productos guardados en el navegador.
+function obtenerProductos() {
+    const datos = localStorage.getItem(CARRITO_STORAGE_KEY);
 
-// Funcion para listar los productos del carrito
-function listarCarrito() {
-    console.log("Productos en el carrito:");
-
-    if (carrito.length === 0) {
-        console.log("El carrito esta vacio.");
-        return;
+    if (datos === null) {
+        return [];
     }
 
-    carrito.forEach((item, indice) => {
-        console.log(
-            `${indice + 1}. ${item.nombre} - S/ ${item.precio}`
-        );
-    });
+    const productos = JSON.parse(datos);
+
+    if (!Array.isArray(productos)) {
+        throw new Error("Los datos del carrito no son válidos.");
+    }
+
+    return productos;
 }
 
-// Productos de prueba
-agregarAlCarrito({ nombre: "Laptop", precio: 2500 });
-agregarAlCarrito({ nombre: "Mouse", precio: 150 });
-agregarAlCarrito({ nombre: "Teclado", precio: 120 });
+// Guardar los productos en localStorage.
+function guardarProductos(productos) {
+    localStorage.setItem(
+        CARRITO_STORAGE_KEY,
+        JSON.stringify(productos)
+    );
+}
 
-// Mostrar los productos
-listarCarrito();
+// Agregar un producto al carrito.
+export function agregarAlCarrito(item) {
+    if (
+        !item ||
+        typeof item.nombre !== "string" ||
+        item.nombre.trim() === ""
+    ) {
+        throw new Error("El nombre del producto es obligatorio.");
+    }
+
+    const precio = Number(item.precio);
+
+    if (!Number.isFinite(precio) || precio <= 0) {
+        throw new Error("El precio debe ser mayor que cero.");
+    }
+
+    const productos = obtenerProductos();
+
+    const nuevoProducto = {
+        nombre: item.nombre.trim(),
+        precio: Math.round((precio + Number.EPSILON) * 100) / 100
+    };
+
+    productos.push(nuevoProducto);
+    guardarProductos(productos);
+
+    return nuevoProducto;
+}
+
+// Listar los productos para mostrarlos en la tabla.
+export function listarCarrito() {
+    return obtenerProductos();
+}
+
+// Vaciar el carrito, por si necesitan esta función más adelante.
+export function vaciarCarrito() {
+    guardarProductos([]);
+}
+
+export function eliminarDelCarrito(indice) {
+    const productos = obtenerProductos();
+
+    if (
+        !Number.isInteger(indice) ||
+        indice < 0 ||
+        indice >= productos.length
+    ) {
+        throw new Error("El producto que deseas eliminar no existe.");
+    }
+
+    const [productoEliminado] = productos.splice(indice, 1);
+
+    guardarProductos(productos);
+
+    return productoEliminado;
+}

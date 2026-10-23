@@ -71,6 +71,36 @@ async function prepararDatosIniciales() {
     localStorage.setItem(CLIENTES_STORAGE_KEY, JSON.stringify(clientesIniciales));
 }
 
+
+async function prepararCarritoInicial() {
+    const clave = "sistemaVentasCarrito";
+
+    // Si ya existen datos, no sobrescribirlos.
+    if (localStorage.getItem(clave) !== null) {
+        return;
+    }
+
+    const respuesta = await fetch("./carrito/carrito.json");
+
+    if (!respuesta.ok) {
+        throw new Error("No se pudo cargar carrito.json.");
+    }
+
+    const productosIniciales = await respuesta.json();
+
+    if (!Array.isArray(productosIniciales)) {
+        throw new Error(
+            "El archivo del carrito debe contener un arreglo."
+        );
+    }
+
+    localStorage.setItem(
+        clave,
+        JSON.stringify(productosIniciales)
+    );
+}
+
+
 // Carga los módulos de forma independiente.
 // Así, un módulo pendiente no impide que se cargue el otro.
 async function cargarModulos() {
@@ -93,10 +123,16 @@ async function cargarModulos() {
 
         if (
             typeof modulo.agregarAlCarrito !== "function" ||
-            typeof modulo.listarCarrito !== "function"
+            typeof modulo.listarCarrito !== "function" ||
+            typeof modulo.eliminarDelCarrito !== "function"
         ) {
             throw new Error("Faltan funciones requeridas en carrito.js.");
         }
+
+        moduloCarrito = modulo;
+        await actualizarCarrito();
+
+        await prepararCarritoInicial();
 
         moduloCarrito = modulo;
         await actualizarCarrito();
@@ -152,6 +188,7 @@ async function actualizarClientes(clientes = null) {
 }
 
 // Actualiza la tabla del carrito y calcula su subtotal.
+
 async function actualizarCarrito() {
     if (!moduloCarrito) return;
 
@@ -169,25 +206,51 @@ async function actualizarCarrito() {
         const celdaNumero = document.createElement("td");
         const celdaNombre = document.createElement("td");
         const celdaPrecio = document.createElement("td");
+        const celdaAcciones = document.createElement("td");
+        const botonEliminar = document.createElement("button");
+
         const precio = Number(producto.precio);
 
         celdaNumero.textContent = indice + 1;
         celdaNombre.textContent = producto.nombre;
         celdaPrecio.textContent = formatearPrecio(precio);
 
+        botonEliminar.type = "button";
+        botonEliminar.className = "FrontEnd-button-danger";
+        botonEliminar.dataset.indice = indice;
+        botonEliminar.textContent = "Eliminar";
+        botonEliminar.setAttribute(
+            "aria-label",
+            `Eliminar producto ${producto.nombre}`
+        );
+
+        celdaAcciones.appendChild(botonEliminar);
+
         subtotal += precio;
-        fila.append(celdaNumero, celdaNombre, celdaPrecio);
+
+        fila.append(
+            celdaNumero,
+            celdaNombre,
+            celdaPrecio,
+            celdaAcciones
+        );
+
         elementos.listaCarrito.appendChild(fila);
     });
 
     if (productos.length === 0) {
-        mostrarFilaVacia(elementos.listaCarrito, 3, "Tu carrito está vacío.");
+        mostrarFilaVacia(
+            elementos.listaCarrito,
+            4,
+            "Tu carrito está vacío."
+        );
     }
 
     elementos.totalProductos.textContent = productos.length;
     elementos.subtotalCarrito.textContent = formatearPrecio(subtotal);
     elementos.subtotalTabla.textContent = formatearPrecio(subtotal);
 }
+
 
 // Presenta los importes en soles peruanos.
 function formatearPrecio(precio) {
@@ -319,6 +382,43 @@ elementos.formularioProducto.addEventListener("submit", async evento => {
         mostrarMensaje(elementos.mensajeCarrito, error.message || "No se pudo agregar el producto.", "error");
     }
 });
+
+elementos.listaCarrito.addEventListener("click", async evento => {
+    const objetivo = evento.target;
+
+    if (!(objetivo instanceof Element)) return;
+
+    const botonEliminar = objetivo.closest(
+        "button[data-indice]"
+    );
+
+    if (!botonEliminar || !moduloCarrito) return;
+
+    const indice = Number(botonEliminar.dataset.indice);
+
+    if (!confirm("¿Seguro que deseas eliminar este producto?")) {
+        return;
+    }
+
+    try {
+        const productoEliminado =
+            await moduloCarrito.eliminarDelCarrito(indice);
+
+        await actualizarCarrito();
+
+        mostrarMensaje(
+            elementos.mensajeCarrito,
+            `Se eliminó ${productoEliminado.nombre} del carrito.`
+        );
+    } catch (error) {
+        mostrarMensaje(
+            elementos.mensajeCarrito,
+            error.message || "No se pudo eliminar el producto.",
+            "error"
+        );
+    }
+});
+
 
 // Inicializa los datos y los módulos al cargar la página.
 async function iniciarSistema() {
