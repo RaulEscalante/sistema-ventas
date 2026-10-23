@@ -68,24 +68,44 @@ async function prepararDatosIniciales() {
     localStorage.setItem(CLIENTES_STORAGE_KEY, JSON.stringify(clientesIniciales));
 }
 
+function listarClientes() {
+    const datos = localStorage.getItem(CLIENTES_STORAGE_KEY);
+    return datos === null ? [] : JSON.parse(datos);
+}
+
+function agregarCliente(nombre) {
+    if (typeof nombre !== "string" || nombre.trim() === "") {
+        throw new Error("El nombre del cliente es obligatorio");
+    }
+
+    const clientes = listarClientes();
+    const nuevoCliente = {
+        id: clientes.length > 0
+            ? Math.max(...clientes.map(cliente => cliente.id)) + 1
+            : 1,
+        nombre: nombre.trim()
+    };
+
+    clientes.push(nuevoCliente);
+    localStorage.setItem(CLIENTES_STORAGE_KEY, JSON.stringify(clientes));
+
+    return nuevoCliente;
+}
+
+function buscarCliente(id) {
+    return listarClientes().find(cliente => cliente.id === Number(id)) ?? null;
+}
+
 // Carga los módulos de forma independiente.
 // Así, un módulo pendiente no impide que se cargue el otro.
 async function cargarModulos() {
     try {
-        const modulo = await import("./clientes/clientes.js");
-
-        if (typeof modulo.listarClientes !== "function" || typeof modulo.agregarCliente !== "function" || typeof modulo.buscarCliente !== "function") {
-            throw new Error("Faltan funciones requeridas en clientes.js.");
-        }
-
-        moduloClientes = modulo;
+        moduloClientes = { listarClientes, agregarCliente, buscarCliente };
         await actualizarClientes();
     } catch (error) {
-        console.warn("Módulo de clientes pendiente:", error.message);
-
-        mostrarFilaVacia(elementos.listaClientes, 2, "El módulo de clientes está pendiente de integración.");
-
-        mostrarMensaje(elementos.mensajeClientes, "Matías debe adaptar y exportar las funciones del módulo de clientes.", "error");
+        console.warn("No se pudieron cargar los clientes:", error.message);
+        mostrarFilaVacia(elementos.listaClientes, 2, "No se pudieron cargar los clientes.");
+        mostrarMensaje(elementos.mensajeClientes, error.message, "error");
     }
 
     try {
