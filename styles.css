@@ -353,6 +353,22 @@ button {
     background: #1d4ed8;
 }
 
+.FrontEnd-button-danger {
+    min-height: 43px;
+    padding: 11px 16px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: #dc2626;
+    color: #ffffff;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.FrontEnd-button-danger:hover {
+    background: #b91c1c;
+}
+
 .FrontEnd-button-secondary {
     border-color: var(--FrontEnd-border);
     background: #f8fafc;

@@ -1,9 +1,12 @@
 
+import * as clientesApi from "./clientes/clientes.js";
+
 const CLIENTES_STORAGE_KEY = "sistemaVentasClientes";
 
 const elementos = {
     formularioCliente: document.getElementById("form-cliente"),
     nombreCliente: document.getElementById("nombre-cliente"),
+    dniCliente: document.getElementById("dni-cliente"),
     formularioBusqueda: document.getElementById("form-buscar-cliente"),
     idBusqueda: document.getElementById("buscar-cliente"),
     limpiarBusqueda: document.getElementById("limpiar-busqueda"),
@@ -68,43 +71,20 @@ async function prepararDatosIniciales() {
     localStorage.setItem(CLIENTES_STORAGE_KEY, JSON.stringify(clientesIniciales));
 }
 
-function listarClientes() {
-    const datos = localStorage.getItem(CLIENTES_STORAGE_KEY);
-    return datos === null ? [] : JSON.parse(datos);
-}
-
-function agregarCliente(nombre) {
-    if (typeof nombre !== "string" || nombre.trim() === "") {
-        throw new Error("El nombre del cliente es obligatorio");
-    }
-
-    const clientes = listarClientes();
-    const nuevoCliente = {
-        id: clientes.length > 0
-            ? Math.max(...clientes.map(cliente => cliente.id)) + 1
-            : 1,
-        nombre: nombre.trim()
-    };
-
-    clientes.push(nuevoCliente);
-    localStorage.setItem(CLIENTES_STORAGE_KEY, JSON.stringify(clientes));
-
-    return nuevoCliente;
-}
-
-function buscarCliente(id) {
-    return listarClientes().find(cliente => cliente.id === Number(id)) ?? null;
-}
-
 // Carga los módulos de forma independiente.
 // Así, un módulo pendiente no impide que se cargue el otro.
 async function cargarModulos() {
     try {
-        moduloClientes = { listarClientes, agregarCliente, buscarCliente };
+        moduloClientes = {
+            listarClientes: clientesApi.listarClientes,
+            agregarCliente: clientesApi.agregarCliente,
+            buscarCliente: clientesApi.buscarCliente,
+            eliminarCliente: clientesApi.eliminarCliente
+        };
         await actualizarClientes();
     } catch (error) {
         console.warn("No se pudieron cargar los clientes:", error.message);
-        mostrarFilaVacia(elementos.listaClientes, 2, "No se pudieron cargar los clientes.");
+        mostrarFilaVacia(elementos.listaClientes, 4, "No se pudieron cargar los clientes.");
         mostrarMensaje(elementos.mensajeClientes, error.message, "error");
     }
 
@@ -144,7 +124,7 @@ async function actualizarClientes(clientes = null) {
     elementos.totalClientes.textContent = resultado.length;
 
     if (resultado.length === 0) {
-        mostrarFilaVacia(elementos.listaClientes, 2, "No hay clientes registrados.");
+        mostrarFilaVacia(elementos.listaClientes, 4, "No hay clientes registrados.");
         return;
     }
 
@@ -152,11 +132,21 @@ async function actualizarClientes(clientes = null) {
         const fila = document.createElement("tr");
         const celdaId = document.createElement("td");
         const celdaNombre = document.createElement("td");
+        const celdaDni = document.createElement("td");
+        const celdaAcciones = document.createElement("td");
+        const botonEliminar = document.createElement("button");
 
         celdaId.textContent = cliente.id;
         celdaNombre.textContent = cliente.nombre;
+        celdaDni.textContent = cliente.dni ?? "";
+        botonEliminar.type = "button";
+        botonEliminar.className = "FrontEnd-button-danger";
+        botonEliminar.dataset.clienteId = cliente.id;
+        botonEliminar.textContent = "Eliminar";
+        botonEliminar.setAttribute("aria-label", `Eliminar cliente ${cliente.nombre}`);
+        celdaAcciones.appendChild(botonEliminar);
 
-        fila.append(celdaId, celdaNombre);
+        fila.append(celdaId, celdaNombre, celdaDni, celdaAcciones);
         elementos.listaClientes.appendChild(fila);
     });
 }
@@ -218,13 +208,44 @@ elementos.formularioCliente.addEventListener("submit", async evento => {
 
     try {
         const nombre = elementos.nombreCliente.value.trim();
-        await moduloClientes.agregarCliente(nombre);
+        const dni = elementos.dniCliente.value.trim();
+        await moduloClientes.agregarCliente(nombre, dni);
         elementos.formularioCliente.reset();
         await actualizarClientes();
 
         mostrarMensaje(elementos.mensajeClientes, "Cliente agregado correctamente.");
     } catch (error) {
         mostrarMensaje(elementos.mensajeClientes, error.message || "No se pudo agregar el cliente.", "error");
+    }
+});
+
+elementos.listaClientes.addEventListener("click", async evento => {
+    const objetivo = evento.target;
+
+    if (!(objetivo instanceof Element)) return;
+
+    const botonEliminar = objetivo.closest("button[data-cliente-id]");
+
+    if (!botonEliminar) return;
+
+    const id = Number(botonEliminar.dataset.clienteId);
+
+    if (!confirm("¿Seguro que deseas eliminar este cliente?")) return;
+
+    try {
+        const clienteEliminado = await moduloClientes.eliminarCliente(id);
+
+        if (!clienteEliminado) {
+            throw new Error("No se encontró el cliente que deseas eliminar.");
+        }
+
+        const clientesActualizados = clientesVisibles === null
+            ? null
+            : clientesVisibles.filter(cliente => cliente.id !== id);
+        await actualizarClientes(clientesActualizados);
+        mostrarMensaje(elementos.mensajeClientes, `Se eliminó a ${clienteEliminado.nombre}.`);
+    } catch (error) {
+        mostrarMensaje(elementos.mensajeClientes, error.message || "No se pudo eliminar el cliente.", "error");
     }
 });
 

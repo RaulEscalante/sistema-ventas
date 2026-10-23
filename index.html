@@ -103,6 +103,11 @@
                         <label for="nombre-cliente">Nombre del cliente</label>
                         <input type="text" id="nombre-cliente" name="nombre" placeholder="Ej. Carlos Ruiz" required>
                     </div>
+                    <div class="FrontEnd-field">
+                        <label for="dni-cliente">DNI (máximo 8 números)</label>
+                        <input type="text" id="dni-cliente" name="dni" inputmode="numeric" pattern="[0-9]{1,8}"
+                            maxlength="8" placeholder="Ej. 12345678" required>
+                    </div>
                     <button type="submit" class="FrontEnd-button">
                         + Agregar cliente
                     </button>
@@ -129,11 +134,13 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Nombre del cliente</th>
+                                <th>DNI</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="lista-clientes">
                             <tr>
-                                <td colspan="2" class="FrontEnd-empty">
+                                <td colspan="4" class="FrontEnd-empty">
                                     Los clientes aparecerán aquí.
                                 </td>
                             </tr>

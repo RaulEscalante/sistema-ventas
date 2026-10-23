@@ -54,10 +54,11 @@ sistema-ventas/
 ### Funcionalidades requeridas
 
 1. Implementar `listarClientes()`, que devuelva un arreglo con los clientes registrados.
-2. Implementar `agregarCliente(nombre)`, que valide el nombre, registre al cliente y devuelva el nuevo registro.
+2. Implementar `agregarCliente(nombre, dni)`, que valide el nombre y un DNI numérico de hasta 8 dígitos, registre al cliente y devuelva el nuevo registro.
 3. Mantener un identificador único y autoincremental para cada cliente.
 4. Implementar `buscarCliente(id)`, que devuelva el cliente encontrado o `null` si no existe.
-5. Preparar datos iniciales de prueba en `clientes.json`.
+5. Implementar `eliminarCliente(id)`, que elimine y devuelva el cliente encontrado o `null` si no existe.
+6. Preparar datos iniciales de prueba en `clientes.json`.
 
 ### Integración con la interfaz
 
@@ -68,7 +69,8 @@ Ejemplo del formato de un cliente:
 ```javascript
 {
     id: 1,
-    nombre: "Carlos Ruiz"
+    nombre: "Carlos Ruiz",
+    dni: "12345678"
 }
 ```
 
@@ -171,8 +173,9 @@ La interfaz espera las siguientes funciones:
 
 **Módulo de clientes**
 - `listarClientes()`
-- `agregarCliente(nombre)`
+- `agregarCliente(nombre, dni)`
 - `buscarCliente(id)`
+- `eliminarCliente(id)`
 
 **Módulo de carrito**
 - `agregarAlCarrito(item)`

@@ -1,26 +1,32 @@
 [
   {
     "id": 1,
-    "nombre": "Matías Pérez"
+    "nombre": "Matías Pérez",
+    "dni": "12345677"
   },
   {
     "id": 2,
-    "nombre": "Ana Torres"
+    "nombre": "Ana Torres",
+    "dni": "87654321"
   },
   {
     "id": 3,
-    "nombre": "Luis García"
+    "nombre": "Luis García",
+    "dni": "11223344"
   },
   {
     "id": 4,
-    "nombre": "Carlos Ruiz"
+    "nombre": "Carlos Ruiz",
+    "dni": "44332211"
   },
   {
     "id": 5,
-    "nombre": "Prueba"
+    "nombre": "Prueba",
+    "dni": "00000000"
   },
   {
     "id": 6,
-    "nombre": "De paz ramos"
+    "nombre": "De paz ramos",
+    "dni": "12345678"
   }
 ]
