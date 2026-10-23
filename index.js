@@ -27,7 +27,17 @@ const elementos = {
     totalClientes: document.getElementById("total-clientes"),
     totalProductos: document.getElementById("total-productos"),
     subtotalCarrito: document.getElementById("subtotal-carrito"),
-    subtotalTabla: document.getElementById("subtotal-tabla")
+    subtotalTabla: document.getElementById("subtotal-tabla"),
+
+    formularioEditarProducto: document.getElementById("form-editar-producto"),
+    indiceEditarProducto: document.getElementById("indice-editar-producto"),
+    nombreEditarProducto: document.getElementById("nombre-editar-producto"),
+    precioEditarProducto: document.getElementById("precio-editar-producto"),
+    cancelarEdicionProducto: document.getElementById("cancelar-edicion-producto"),
+
+    modalEditarProducto: document.getElementById("modal-editar-producto"),
+
+    cerrarModalEditar: document.getElementById("cerrar-modal-editar"),
 };
 
 let moduloClientes = null;
@@ -131,13 +141,11 @@ async function cargarModulos() {
         if (
             typeof modulo.agregarAlCarrito !== "function" ||
             typeof modulo.listarCarrito !== "function" ||
-            typeof modulo.eliminarDelCarrito !== "function"
+            typeof modulo.eliminarDelCarrito !== "function" ||
+            typeof modulo.modificarProducto !== "function"
         ) {
             throw new Error("Faltan funciones requeridas en carrito.js.");
         }
-
-        moduloCarrito = modulo;
-        await actualizarCarrito();
 
         await prepararCarritoInicial();
 
@@ -224,6 +232,15 @@ async function actualizarCarrito() {
         const celdaPrecio = document.createElement("td");
         const celdaAcciones = document.createElement("td");
         const botonEliminar = document.createElement("button");
+
+        const botonEditar = document.createElement("button");
+
+        botonEditar.type = "button";
+        botonEditar.className = "FrontEnd-button-secondary";
+        botonEditar.dataset.indiceEditar = indice;
+        botonEditar.textContent = "Editar";
+
+        celdaAcciones.appendChild(botonEditar);
 
         const precio = Number(producto.precio);
 
@@ -461,41 +478,99 @@ elementos.formularioProducto.addEventListener("submit", async evento => {
     }
 });
 
+
 elementos.listaCarrito.addEventListener("click", async evento => {
     const objetivo = evento.target;
 
     if (!(objetivo instanceof Element)) return;
 
-    const botonEliminar = objetivo.closest(
-        "button[data-indice]"
+    const botonEditar = objetivo.closest(
+        "button[data-indice-editar]"
     );
 
-    if (!botonEliminar || !moduloCarrito) return;
-
-    const indice = Number(botonEliminar.dataset.indice);
-
-    if (!confirm("¿Seguro que deseas eliminar este producto?")) {
-        return;
-    }
+    if (!botonEditar || !moduloCarrito) return;
 
     try {
-        const productoEliminado =
-            await moduloCarrito.eliminarDelCarrito(indice);
+        const indice = Number(botonEditar.dataset.indiceEditar);
+        const productos = await moduloCarrito.listarCarrito();
+        const producto = productos[indice];
 
-        await actualizarCarrito();
+        if (!producto) {
+            throw new Error("No se encontró el producto.");
+        }
 
-        mostrarMensaje(
-            elementos.mensajeCarrito,
-            `Se eliminó ${productoEliminado.nombre} del carrito.`
-        );
+        elementos.indiceEditarProducto.value = indice;
+        elementos.nombreEditarProducto.value = producto.nombre;
+        elementos.precioEditarProducto.value = producto.precio;
+
+        elementos.modalEditarProducto.showModal();
+        elementos.nombreEditarProducto.focus();
     } catch (error) {
         mostrarMensaje(
             elementos.mensajeCarrito,
-            error.message || "No se pudo eliminar el producto.",
+            error.message,
             "error"
         );
     }
 });
+
+
+elementos.formularioEditarProducto.addEventListener(
+    "submit",
+    async evento => {
+        evento.preventDefault();
+
+        const indice = Number(
+            elementos.indiceEditarProducto.value
+        );
+
+        const nombre =
+            elementos.nombreEditarProducto.value.trim();
+
+        const precio =
+            Number(elementos.precioEditarProducto.value);
+
+        try {
+            await moduloCarrito.modificarProducto(indice, {
+                nombre,
+                precio
+            });
+
+            // Limpiar el formulario y cerrar el modal.
+            elementos.formularioEditarProducto.reset();
+            elementos.modalEditarProducto.close();
+
+            // Actualizar tabla y subtotal.
+            await actualizarCarrito();
+
+            mostrarMensaje(
+                elementos.mensajeCarrito,
+                "Producto modificado correctamente."
+            );
+        } catch (error) {
+            mostrarMensaje(
+                elementos.mensajeCarrito,
+                error.message || "No se pudo modificar el producto.",
+                "error"
+            );
+        }
+    }
+);
+
+
+
+elementos.cancelarEdicionProducto.addEventListener("click", () => {
+    elementos.formularioEditarProducto.reset();
+    elementos.modalEditarProducto.close();
+});
+
+elementos.cerrarModalEditar.addEventListener("click", () => {
+    elementos.formularioEditarProducto.reset();
+    elementos.modalEditarProducto.close();
+});
+
+
+
 
 
 // Inicializa los datos y los módulos al cargar la página.

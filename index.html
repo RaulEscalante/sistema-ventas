@@ -198,6 +198,69 @@
                         + Agregar producto
                     </button>
                 </form>
+                
+                <dialog id="modal-editar-producto" class="FrontEnd-modal">
+                    <div class="FrontEnd-modal-header">
+                        <div>
+                            <p class="FrontEnd-eyebrow">GESTIÓN DE PRODUCTOS</p>
+                            <h2>Editar producto</h2>
+                        </div>
+
+                        <button
+                            type="button"
+                            id="cerrar-modal-editar"
+                            class="FrontEnd-button-ghost"
+                            aria-label="Cerrar modal"
+                        >
+                            ✕
+                        </button>
+                    </div>
+
+                    <p>Modifica los datos del producto seleccionado.</p>
+
+                    <form id="form-editar-producto" class="FrontEnd-form">
+                        <input type="hidden" id="indice-editar-producto">
+
+                        <div class="FrontEnd-field">
+                            <label for="nombre-editar-producto">
+                                Nombre del producto
+                            </label>
+                            <input
+                                type="text"
+                                id="nombre-editar-producto"
+                                required
+                            >
+                        </div>
+
+                        <div class="FrontEnd-field">
+                            <label for="precio-editar-producto">
+                                Precio (S/)
+                            </label>
+                            <input
+                                type="number"
+                                id="precio-editar-producto"
+                                min="0.01"
+                                step="0.01"
+                                required
+                            >
+                        </div>
+
+                        <div class="FrontEnd-modal-actions">
+                            <button
+                                type="button"
+                                id="cancelar-edicion-producto"
+                                class="FrontEnd-button-ghost"
+                            >
+                                Cancelar
+                            </button>
+
+                            <button type="submit" class="FrontEnd-button">
+                                Guardar cambios
+                            </button>
+                        </div>
+                    </form>
+                </dialog>
+
 
                 <div id="mensaje-carrito" class="FrontEnd-message" role="status" aria-live="polite"></div>
 

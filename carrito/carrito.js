@@ -82,3 +82,39 @@ export function eliminarDelCarrito(indice) {
 
     return productoEliminado;
 }
+
+
+export function modificarProducto(indice, nuevosDatos) {
+    const productos = obtenerProductos();
+
+    if (
+        !Number.isInteger(indice) ||
+        indice < 0 ||
+        indice >= productos.length
+    ) {
+        throw new Error("El producto que deseas modificar no existe.");
+    }
+
+    if (
+        !nuevosDatos ||
+        typeof nuevosDatos.nombre !== "string" ||
+        nuevosDatos.nombre.trim() === ""
+    ) {
+        throw new Error("El nombre del producto es obligatorio.");
+    }
+
+    const precio = Number(nuevosDatos.precio);
+
+    if (!Number.isFinite(precio) || precio <= 0) {
+        throw new Error("El precio debe ser mayor que cero.");
+    }
+
+    productos[indice] = {
+        nombre: nuevosDatos.nombre.trim(),
+        precio: Math.round((precio + Number.EPSILON) * 100) / 100
+    };
+
+    guardarProductos(productos);
+
+    return productos[indice];
+}
